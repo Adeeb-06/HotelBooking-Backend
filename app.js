@@ -6,6 +6,7 @@ import bookingRouter from './routes/bookingRouter.js'
 import cors from 'cors'
 import connectDB from './config/mongodb.js'
 import dotenv from 'dotenv'
+import hotelRouter from './routes/hotelRouter.js'
 
 dotenv.config({ path: './.env' })
 
@@ -25,6 +26,7 @@ app.use(cors({
 
 app.use('/api/room', roomRouter);
 app.use('/api', bookingRouter);
+app.use('/api/hotel', hotelRouter);
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000')

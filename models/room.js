@@ -9,6 +9,11 @@ const roomSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  hotel: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Hotel',
+    required:true
+  },
   // This will hold references to all bookings for this room
   bookings: [{
     type: mongoose.Schema.Types.ObjectId,
