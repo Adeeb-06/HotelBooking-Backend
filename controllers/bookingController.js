@@ -15,6 +15,20 @@ export const createBooking = async (req, res) => {
             return res.status(404).json({ message: "Room not found" });
         }
 
+        const overlappingBooking = await bookingModel.findOne({
+            room: roomId,
+            startDate: { $lt: endDate },
+            endDate: { $gt: startDate }
+        });
+
+        if (overlappingBooking) {
+            return res.status(409).json({
+                success: false,
+                message: "Room already booked during selected dates"
+
+            });
+        }
+
         const newBooking = new bookingModel({
             room: room._id,
             startDate,
