@@ -7,6 +7,7 @@ import cors from 'cors'
 import connectDB from './config/mongodb.js'
 import dotenv from 'dotenv'
 import hotelRouter from './routes/hotelRouter.js'
+import connectCloudinary from './config/cloudinary.js'
 
 dotenv.config({ path: './.env' })
 
@@ -14,6 +15,8 @@ const app = express()
 
 
 connectDB()
+connectCloudinary()
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())

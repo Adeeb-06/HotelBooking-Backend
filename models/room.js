@@ -14,6 +14,7 @@ const roomSchema = new mongoose.Schema({
     ref: 'Hotel',
     required:true
   },
+  images : [String],
   // This will hold references to all bookings for this room
   bookings: [{
     type: mongoose.Schema.Types.ObjectId,

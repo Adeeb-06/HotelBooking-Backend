@@ -1,6 +1,8 @@
 import hotelModel from "../models/hotel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"; // make sure you're importing jwt
+import {v2 as cloudinary} from 'cloudinary';
+import fs from 'fs';
 
 export const createHotel = async (req, res) => {
     const { name, email, password, city, address, phone } = req.body;
@@ -19,13 +21,24 @@ export const createHotel = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(password, salt);
 
+
+        const uploadedImage = await cloudinary.uploader.upload(req.file.path)
+        console.log('Deleting file:', req.file.path);
+        fs.unlinkSync(req.file.path);
+
+
+
+
+
         const newHotel = new hotelModel({
             name,
             email,
             password: hash,
             city,
             address,
-            phone
+            phone,
+            image: uploadedImage.secure_url,
+
         });
 
         await newHotel.save();

@@ -1,5 +1,7 @@
 import hotelModel from "../models/hotel.js";
 import roomModel from "../models/room.js";
+import {v2 as cloudinary} from 'cloudinary';
+import fs from 'fs';
 
 export const createRoom = async (req, res) => {
     const { name, bedCount , hotelId } = req.body;
@@ -8,11 +10,22 @@ export const createRoom = async (req, res) => {
         return res.status(404).json({ message: "All fields are required" });
     }
 
+    const uploadImages = req.files.map(async (file) => {
+        const res = await cloudinary.uploader.upload(file.path)
+        fs.unlinkSync(file.path);
+        return res.secure_url;
+    });
+
+
+    const imageUrls = await Promise.all(uploadImages);
+
+
     try {
         const roomCreated = new roomModel({
             name,
             bedCount,
-            hotel: hotelId
+            hotel: hotelId,
+            images: imageUrls
         });
 
         await roomCreated.save();
