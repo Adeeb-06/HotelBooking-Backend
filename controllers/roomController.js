@@ -4,9 +4,11 @@ import {v2 as cloudinary} from 'cloudinary';
 import fs from 'fs';
 
 export const createRoom = async (req, res) => {
-    const { name, bedCount , hotelId } = req.body;
+    const hotelId = req.hotelId;
+    const { name, description, pricePerNight, bedType, extraBedPrice } = req.body;
+     const amenities = JSON.parse(req.body.amenities || '[]');
 
-    if (!name || !bedCount || !hotelId) {
+    if (!name) {
         return res.status(404).json({ message: "All fields are required" });
     }
 
@@ -23,9 +25,13 @@ export const createRoom = async (req, res) => {
     try {
         const roomCreated = new roomModel({
             name,
-            bedCount,
-            hotel: hotelId,
-            images: imageUrls
+            description,
+            // hotel: hotelId,
+            pricePerNight,
+            images: imageUrls,
+            bedType,
+            amenities,
+            extraBedPrice
         });
 
         await roomCreated.save();

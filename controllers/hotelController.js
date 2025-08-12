@@ -1,44 +1,34 @@
 import hotelModel from "../models/hotel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"; // make sure you're importing jwt
-import {v2 as cloudinary} from 'cloudinary';
-import fs from 'fs';
 
 export const createHotel = async (req, res) => {
-    const { name, email, password, city, address, phone } = req.body;
+    const { hotelName, email, password } = req.body;
 
-    if (!name || !email || !password || !city || !address || !phone) {
+    if (!hotelName || !email || !password) {
         return res.status(400).json({ message: "All fields are required" });
     }
 
     try {
-        const existingHotel = await hotelModel.findOne({ name });
-
+        const existingHotel = await hotelModel.findOne({ email });
         if (existingHotel) {
-            return res.status(409).json({ message: "Hotel already exists" });
+            return res.status(409).json({ success: false, message: "Hotel already exists" });
+        }
+
+        const hotelNameExists = await hotelModel.findOne({ hotelName });
+        if (hotelNameExists) {
+            return res.status(409).json({ success: false, message: "Hotel name already taken" });
         }
 
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(password, salt);
 
 
-        const uploadedImage = await cloudinary.uploader.upload(req.file.path)
-        console.log('Deleting file:', req.file.path);
-        fs.unlinkSync(req.file.path);
-
-
-
-
 
         const newHotel = new hotelModel({
-            name,
+            hotelName,
             email,
             password: hash,
-            city,
-            address,
-            phone,
-            image: uploadedImage.secure_url,
-
         });
 
         await newHotel.save();
@@ -84,9 +74,28 @@ export const loginHotel = async (req, res) => {
             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
             maxAge: 86400000,
         });
-        res.status(200).json({ success: true, message: "Login successful" });
+        res.status(201).json({ success: true, message: "Login successful" });
     } catch (error) {
         console.error("Login error:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
+export const isHotelOwner = async (req, res) => {
+    try {
+        res.status(200).json({ success: true, message: "User is authenticated" });
+    } catch (error) {
+        console.error("Error checking authentication:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
+export const logoutHotel = async (req, res) => {
+    try {
+        res.clearCookie('token');
+        res.status(200).json({ success: true, message: "Logout successful" });
+    } catch (error) {
+        console.error("Error checking logout:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 }

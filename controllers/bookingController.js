@@ -2,9 +2,9 @@ import roomModel from "../models/room.js";
 import bookingModel from "../models/booking.js";
 
 export const createBooking = async (req, res) => {
-    const { roomId, startDate, endDate, guests } = req.body;
+    const { roomId, guestName, startDate, endDate, guests } = req.body;
 
-    if (!roomId || !startDate || !endDate || !guests) {
+    if (!roomId || !guestName || !startDate || !endDate || !guests) {
         return res.status(404).json({ message: "All fields are required" });
     }
 
@@ -31,6 +31,7 @@ export const createBooking = async (req, res) => {
 
         const newBooking = new bookingModel({
             room: room._id,
+            guestName,
             startDate,
             endDate,
             guests

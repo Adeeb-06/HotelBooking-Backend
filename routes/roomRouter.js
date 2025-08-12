@@ -7,6 +7,6 @@ import upload from '../middleware/uploadMiddleware.js';
 
 const roomRouter = express.Router();
 
-roomRouter.post('/create-room', upload.array('images' , 4), hotelAuth, createRoom);
+roomRouter.post('/create-room', upload.array('images' , 4), createRoom);
 
 export default roomRouter;

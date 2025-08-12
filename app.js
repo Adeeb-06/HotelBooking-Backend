@@ -14,14 +14,23 @@ dotenv.config({ path: './.env' })
 const app = express()
 
 
+
+
 connectDB()
 connectCloudinary()
+
+app.use((req, res, next) => {
+  console.log('Incoming Request:', req.method, req.url);
+  console.log('Cookies received:', req.cookies);
+  next();
+});
+
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:3000',
     credentials: true
 }));
 
@@ -31,6 +40,6 @@ app.use('/api/room', roomRouter);
 app.use('/api', bookingRouter);
 app.use('/api/hotel', hotelRouter);
 
-app.listen(3000, () => {
-  console.log('Server is running on port 3000')
+app.listen(8000, () => {
+  console.log('Server is running on port 8000')
 })
