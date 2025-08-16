@@ -2,47 +2,65 @@ import roomModel from "../models/room.js";
 import bookingModel from "../models/booking.js";
 
 export const createBooking = async (req, res) => {
-    const { roomId, guestName, startDate, endDate, guests } = req.body;
+    const { hotelId } = req.hotelId; // 👈 careful here, usually it's req.body or req.user
+    const { roomIds, guestName, startDate, endDate, guests, totalPrice } = req.body;
 
-    if (!roomId || !guestName || !startDate || !endDate || !guests) {
-        return res.status(404).json({ message: "All fields are required" });
+    if (!roomIds || !Array.isArray(roomIds) || roomIds.length === 0 || !guestName || !startDate || !endDate || !guests) {
+        return res.status(400).json({ message: "All fields are required and roomIds must be a non-empty array" });
     }
 
     try {
-        const room = await roomModel.findById(roomId);
-
-        if (!room) {
-            return res.status(404).json({ message: "Room not found" });
+        // 1️⃣ Check if all rooms exist
+        const rooms = await roomModel.find({ _id: { $in: roomIds } });
+        if (rooms.length !== roomIds.length) {
+            return res.status(404).json({ message: "One or more rooms not found" });
         }
 
-        const overlappingBooking = await bookingModel.findOne({
-            room: roomId,
-            startDate: { $lt: endDate },
-            endDate: { $gt: startDate }
-        });
+        // Convert to Date objects
+        const newStart = new Date(startDate);
+        const newEnd = new Date(endDate);
 
-        if (overlappingBooking) {
-            return res.status(409).json({
-                success: false,
-                message: "Room already booked during selected dates"
+        // 2️⃣ Check for overlapping bookings for each room
+        for (const roomId of roomIds) {
+            const existingBookings = await bookingModel.find({ roomIds: roomId });
 
-            });
+            for (const booking of existingBookings) {
+                const existingStart = new Date(booking.startDate);
+                const existingEnd = new Date(booking.endDate);
+
+                // 🔑 Raw if/else overlap check
+                if (existingStart <= newEnd && existingEnd >= newStart) {
+                    return res.status(409).json({
+                        success: false,
+                        message: `❌ Room ${roomId} is already booked between ${existingStart.toDateString()} and ${existingEnd.toDateString()}`
+                    });
+                }
+            }
         }
 
+        // 3️⃣ Create booking if no conflicts
         const newBooking = new bookingModel({
-            room: room._id,
+            hotelId,
+            roomIds,
             guestName,
-            startDate,
-            endDate,
-            guests
+            startDate: newStart,
+            endDate: newEnd,
+            guests,
+            totalPrice
         });
-        room.bookings.push(newBooking._id);
-        await room.save();
+
         await newBooking.save();
 
-        res.status(201).json({ success: true, message: "Booking created successfully" });
+        // Link booking to rooms
+        for (const room of rooms) {
+            room.bookings.push(newBooking._id);
+            await room.save();
+        }
+
+        res.status(201).json({ success: true, message: "✅ Booking created successfully for all rooms" });
+
     } catch (error) {
         console.error("Booking error:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
     }
-}
+};

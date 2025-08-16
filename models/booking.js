@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
 
 const bookingSchema = new mongoose.Schema({
-  room: {
+  hotelId: { type: mongoose.Schema.Types.ObjectId, ref: "Hotel"},
+  roomIds: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
     required: true
-  },
+  }],
   guestName:{type: String, required: true},
   startDate: {
     type: Date,
@@ -18,6 +19,10 @@ const bookingSchema = new mongoose.Schema({
   guests: {
     type: Number,
     default: 1
+  },
+  totalPrice: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 

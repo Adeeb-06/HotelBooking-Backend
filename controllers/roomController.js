@@ -26,7 +26,7 @@ export const createRoom = async (req, res) => {
         const roomCreated = new roomModel({
             name,
             description,
-            // hotel: hotelId,
+            hotelId,
             pricePerNight,
             images: imageUrls,
             bedType,
@@ -38,6 +38,18 @@ export const createRoom = async (req, res) => {
         await hotelModel.findByIdAndUpdate(hotelId, { $push: { rooms: roomCreated._id } });
 
         res.status(201).json({ success: true, message: "Room created successfully" });
+    } catch (error) {
+        console.error("Room error:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
+
+export const getRooms = async (req, res) => {
+    const hotelId = req.hotelId;
+    try {
+        const rooms = await roomModel.find({ hotelId });
+        res.status(200).json({ success: true, message: "Rooms retrieved successfully", rooms });
     } catch (error) {
         console.error("Room error:", error);
         res.status(500).json({ success: false, message: "Internal server error" });

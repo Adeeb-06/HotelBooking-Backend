@@ -13,18 +13,8 @@ dotenv.config({ path: './.env' })
 
 const app = express()
 
-
-
-
 connectDB()
 connectCloudinary()
-
-app.use((req, res, next) => {
-  console.log('Incoming Request:', req.method, req.url);
-  console.log('Cookies received:', req.cookies);
-  next();
-});
-
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -37,7 +27,7 @@ app.use(cors({
 
 
 app.use('/api/room', roomRouter);
-app.use('/api', bookingRouter);
+app.use('/api/booking', bookingRouter);
 app.use('/api/hotel', hotelRouter);
 
 app.listen(8000, () => {
