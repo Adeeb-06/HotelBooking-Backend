@@ -65,3 +65,16 @@ export const createBooking = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+
+
+export const getBookings = async (req, res) => {
+    const { hotelId } = req.hotelId; 
+    try {
+        const bookings = await bookingModel.find({ hotelId });
+        res.status(200).json({ success: true, bookings });
+        
+    } catch (error) {
+        console.error("Booking error:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
