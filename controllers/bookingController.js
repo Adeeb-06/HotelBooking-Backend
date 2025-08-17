@@ -27,12 +27,13 @@ export const createBooking = async (req, res) => {
             for (const booking of existingBookings) {
                 const existingStart = new Date(booking.startDate);
                 const existingEnd = new Date(booking.endDate);
+                const room = await roomModel.findById(roomId);
 
                 // 🔑 Raw if/else overlap check
                 if (existingStart <= newEnd && existingEnd >= newStart) {
                     return res.status(409).json({
                         success: false,
-                        message: `❌ Room ${roomId} is already booked between ${existingStart.toDateString()} and ${existingEnd.toDateString()}`
+                        message: `❌ Room ${room.name} is already booked between ${existingStart.toDateString()} and ${existingEnd.toDateString()}`
                     });
                 }
             }
