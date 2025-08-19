@@ -55,3 +55,17 @@ export const getRooms = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 }
+
+export const getRoomByBookingId = async (req, res) => {
+    const { bookingId } = req.params;
+    try {
+        const room = await roomModel.find({ bookings: bookingId });
+        if (!room) {
+            return res.status(404).json({ success: false, message: "Room not found" });
+        }
+        res.status(200).json({ success: true, message: "Room retrieved successfully", room });
+    } catch (error) {
+        console.error("Room error:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }   
+}
