@@ -2,12 +2,14 @@ import roomModel from "../models/room.js";
 import bookingModel from "../models/booking.js";
 
 export const createBooking = async (req, res) => {
-    const { hotelId } = req.hotelId; // 👈 careful here, usually it's req.body or req.user
+    const  hotelId  = req.hotelId;
     const { roomIds, guestName, startDate, endDate, guests, totalPrice } = req.body;
 
     if (!roomIds || !Array.isArray(roomIds) || roomIds.length === 0 || !guestName || !startDate || !endDate || !guests) {
         return res.status(400).json({ message: "All fields are required and roomIds must be a non-empty array" });
     }
+
+    console.log(hotelId)
 
     try {
         // 1️⃣ Check if all rooms exist
@@ -68,7 +70,7 @@ export const createBooking = async (req, res) => {
 
 
 export const getBookings = async (req, res) => {
-    const { hotelId } = req.hotelId; 
+    const  hotelId  = req.hotelId; 
     try {
         const bookings = await bookingModel.find({ hotelId });
         res.status(200).json({ success: true, bookings });
