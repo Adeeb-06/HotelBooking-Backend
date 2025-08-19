@@ -95,3 +95,38 @@ export const getBookingById = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+
+export const updateBooking = async (req, res) => {
+    const { bookingId } = req.params;
+    const { guestName, startDate, endDate, guests, totalPrice } = req.body;
+
+    if (!bookingId || !guestName || !startDate || !endDate || !guests) {
+        return res.status(400).json({ message: "All fields are required and roomIds must be a non-empty array" });
+    }
+    const start = new Date(startDate);
+ 
+
+    if(start < new Date()) {
+        return res.status(400).json({ message: "Can not be updated as start date is in the past" });
+    }
+
+    try {
+        const booking = await bookingModel.findById(bookingId);
+        if (!booking) {
+            return res.status(404).json({ success: false, message: "Booking not found" });
+        }
+
+        const updatedBooking = await bookingModel.findByIdAndUpdate(bookingId, {
+            guestName,
+            startDate,
+            endDate,
+            guests,
+            totalPrice
+        });
+
+        res.status(200).json({ success: true, booking: updatedBooking });
+    } catch (error) {
+        console.error("Booking error:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
